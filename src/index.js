@@ -5,6 +5,7 @@ const userRouter = require('./routers/userRouter')
 const categoryRouter = require('./routers/categoryRouter')
 const brandRouter = require('./routers/brandRouter')
 const productRouter = require('./routers/productRouter')
+const orderRouter = require('./routers/orderRouter')
 
 const app = express()
 const port = process.env.port || 2019
@@ -16,6 +17,7 @@ app.use(userRouter)
 app.use(categoryRouter)
 app.use(brandRouter)
 app.use(productRouter)
+app.use(orderRouter)
 
 app.get('/', (req, res) => {
     res.send('<h1> Selamat Datang </h1>')

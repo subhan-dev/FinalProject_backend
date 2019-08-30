@@ -4,23 +4,37 @@ const router = require('express').Router()
 const upload = require('../helpers/multer')
 
 // input brand
-router.post('/brand', upload.upstore(upload.photosdir2).single('icon'), (req, res) => {
+// router.post('/brand', upload.upstore(upload.photosdir2).single('icon'), (req, res) => {
+//     const sql = `insert into brand set ?`
+//     const sql2 = `select * from brand where id = ?`
+
+//     const {
+//         brand_name
+//     } = req.body
+
+
+//     console.log(req)
+//     conn.query(sql, {brand_name:brand_name , logo:req.file.filename }, (err, result) => {
+//         if(err) return res.send(err)
+
+//         conn.query(sql2, result.insertId, (err, result) => {
+//             if(err) return res.send(err)
+
+//             res.send(result)
+//         })
+//     })
+// })
+
+router.post('/brand', (req, res) => {
     const sql = `insert into brand set ?`
     const sql2 = `select * from brand where id = ?`
 
-    const {
-        brand_name
-    } = req.body
-
-
-    console.log(req)
-    conn.query(sql, {brand_name:brand_name , logo:req.file.filename }, (err, result) => {
+    conn.query(sql, req.body, (err, result) => {
         if(err) return res.send(err)
 
-        conn.query(sql2, result.insertId, (err, result) => {
+        conn.query(sql2, result.insertId, (err, result2) => {
             if(err) return res.send(err)
-
-            res.send(result)
+            res.send(result2)
         })
     })
 })

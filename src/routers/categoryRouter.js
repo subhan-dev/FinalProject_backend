@@ -19,7 +19,7 @@ router.post('/category', (req, res) => {
 // edit category
 router.patch('/category/:id', (req, res) => {
     const sql = `update category set ? where id = '${req.params.id}'`
-    const sql2 = `select nama from category where id = '${req.params.id}'`
+    const sql2 = `select * from category where id = '${req.params.id}'`
     conn.query(sql, req.body, (err, result) => {
         if(err) return res.send(err)
 
