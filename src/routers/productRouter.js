@@ -1,5 +1,6 @@
 const conn = require('../connection/index');
 const router = require('express').Router();
+const fs = require('fs')
 
 const upload = require('../helpers/multer')
 // add products
@@ -7,9 +8,9 @@ router.post('/products', upload.upstore(upload.photosdir3).single('image'),(req,
     const sql = `insert into products set ?`
     const sql2 = `select * from products where id = ?`
 
-    const { name, description, price, brand_id, category_id} = req.body
+    const { name, description, price, brand_id, category_id, stock} = req.body
 
-    conn.query(sql, {name: name, description: description, price: price, brand_id: brand_id, category_id: category_id, image: req.file.filename}, (err, result) => {
+    conn.query(sql, {name: name, description: description, price: price, brand_id: brand_id, category_id: category_id, image: req.file.filename, stock: stock}, (err, result) => {
         if(err) return res.send(err.message)
 
         conn.query(sql2, result.insertId, (err, result2) => {
@@ -17,6 +18,23 @@ router.post('/products', upload.upstore(upload.photosdir3).single('image'),(req,
             res.send(result2)
         })
     })
+})
+
+// access product image
+router.get('/products/image/:imageName', (req, res) => {
+    // Letak folder photo
+    const options = {
+        root: upload.photosdir3
+    }
+
+    // Filename / nama photo
+    const fileName = req.params.imageName
+
+    res.sendFile(fileName, options, function(err){
+        if(err) return res.send(err)
+        
+    })
+
 })
 
 // edit products
@@ -78,8 +96,17 @@ router.delete('/products/:id', (req, res) => {
 })
 
 // get products
+router.get('/productsNew', (req, res) => {
+    const sql = `select * from products order by create_at asc limit 4`
+
+    conn.query(sql, (err, result) => {
+        if(err) return res.send(err)
+
+        res.send(result)
+    })
+})
 router.get('/products', (req, res) => {
-    const sql = `select * from products`
+    const sql = `select * from products p join category c on c.id = p.category_id join brand b on b.id = p.brand_id`
 
     conn.query(sql, (err, result) => {
         if(err) return res.send(err)
@@ -91,6 +118,25 @@ router.get('/products', (req, res) => {
 // get product by id
 router.get('/products/:id', (req, res) => {
     const sql = `select * from products where id = '${req.params.id}'`
+
+    conn.query(sql, (err, result) => {
+        if(err) return res.send(err)
+
+        res.send(result)
+    })
+})
+router.get('/get-products/:id', (req, res) => {
+    const sql = `select * from products where id = '${req.params.id}'`
+
+    conn.query(sql, (err, result) => {
+        if(err) return res.send(err)
+
+        res.send(result)
+    })
+})
+// get product by catogory
+router.get('/products-category/:id', (req, res) => {
+    const sql = `select * from products where category_id = '${req.params.id}'`
 
     conn.query(sql, (err, result) => {
         if(err) return res.send(err)

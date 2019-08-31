@@ -37,7 +37,7 @@ router.post('/users/avatar/:uname', upload.upstore(upload.photosdir1).single('av
 router.get('/users/avatar/:imageName', (req, res) => {
     // Letak folder photo
     const options = {
-        root: photosdir
+        root: upload.photosdir1
     }
 
     // Filename / nama photo
@@ -119,34 +119,53 @@ router.post('/login-user', (req, res) => {
 })
 
 // get users
-router.get('/get-users/:username/:email', (req, res) => {
-    const sql = `SELECT * FROM users WHERE username = '${req.params.username}' OR email = '${req.params.email}'`
+router.get('/users/:id', (req, res) => {
+    const sql = `select * from users where id = '${req.params.id}'`
 
     conn.query(sql, (err, result) => {
-        // Jika ada error dalam menjalankan query, akan dikirim errornya
-        if(err) return res.send(err.sqlMessage)
+        if(err) return res.send(err)
+
         res.send(result)
     })
 })
+// router.get('/get-users/:username/:email', (req, res) => {
+//     const sql = `SELECT * FROM users WHERE username = '${req.params.username}' OR email = '${req.params.email}'`
+
+//     conn.query(sql, (err, result) => {
+//         // Jika ada error dalam menjalankan query, akan dikirim errornya
+//         if(err) return res.send(err.sqlMessage)
+//         res.send(result)
+//     })
+// })
 
 // edit user
-router.patch('/users/profile/:uname', (req, res) => {
-    const sql = `UPDATE users SET ? WHERE username = '${req.params.uname}'`
-    const sql2 = `SELECT username, name ,email 
-                    FROM users WHERE username = '${req.params.uname}'`
-
-    conn.query(sql, req.body, (err, result) => {
-        if(err) return res.send(err)
-
-        conn.query(sql2, (err, result) => {
-            if(err) return res.send(err)
-
-            res.send({
-                message: 'Ok',
-                data: result[0]
+router.patch('/users/profile/:id', upload.upstore(upload.photosdir1).single('avatar'), (req, res) => {
+    const sql = `UPDATE users SET ? WHERE id = '${req.params.id}'`
+    const sql2 = `SELECT * FROM users WHERE id = '${req.params.id}'`
+    if(!isEmail(req.body.email)) return res.send('Email is not valid')
+    if(req.file === undefined) {
+        conn.query(sql, req.body, (err, result) => {
+            if(err) return res.send(err.message)
+    
+            conn.query(sql2, (err, result2) => {
+                if(err) return res.send(err.message)
+    
+                res.send(result2)
             })
         })
-    })
+    } else {
+        
+        const data = {...req.body, avatar: req.file.filename}
+        conn.query(sql, data, (err, result) => {
+            if(err) return res.send(err.message)
+    
+            conn.query(sql2, (err, result2) => {
+                if(err) return res.send(err.message)
+    
+                res.send(result2)
+            })
+        })
+    }
 })
 
 // VERIFY USER

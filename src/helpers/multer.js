@@ -5,6 +5,7 @@ const rootdir = path.join(__dirname,'/../..')
 const photosdir1 = path.join(rootdir, '/upload/profileImages')
 const photosdir2 = path.join(rootdir, '/upload/logoBrand')
 const photosdir3 = path.join(rootdir, '/upload/productImage')
+const photosdir4 = path.join(rootdir, '/upload/buktiTransaksi')
 
 const upstore = (dir) => {
     return multer(
@@ -22,7 +23,7 @@ const upstore = (dir) => {
                         }
                     ),
             limits: {
-                fileSize: 1000000 // Byte , default 1MB
+                fileSize: 5000000 // Byte , default 1MB
             },
             fileFilter(req, file, cb) {
                 if(!file.originalname.match(/\.(jpg|jpeg|png)$/)){ // will be error if the extension name is not one of these
@@ -40,5 +41,6 @@ module.exports = {
     upstore,
     photosdir1,
     photosdir2,
-    photosdir3
+    photosdir3,
+    photosdir4
 }
