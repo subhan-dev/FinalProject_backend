@@ -128,15 +128,16 @@ router.get('/users/:id', (req, res) => {
         res.send(result)
     })
 })
-// router.get('/get-users/:username/:email', (req, res) => {
-//     const sql = `SELECT * FROM users WHERE username = '${req.params.username}' OR email = '${req.params.email}'`
+// cek regis
+router.get('/gett-users/:username/:email', (req, res) => {
+    const sql = `SELECT * FROM users WHERE username = '${req.params.username}' OR email = '${req.params.email}'`
 
-//     conn.query(sql, (err, result) => {
-//         // Jika ada error dalam menjalankan query, akan dikirim errornya
-//         if(err) return res.send(err.sqlMessage)
-//         res.send(result)
-//     })
-// })
+    conn.query(sql, (err, result) => {
+        // Jika ada error dalam menjalankan query, akan dikirim errornya
+        if(err) return res.send(err.sqlMessage)
+        res.send(result)
+    })
+})
 
 // edit user
 router.patch('/users/profile/:id', upload.upstore(upload.photosdir1).single('avatar'), (req, res) => {
