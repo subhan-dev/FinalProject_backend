@@ -181,5 +181,227 @@ router.get('/users/verify', (req, res) => {
     })
 })
 
+var http = require("https");
+
+var options = {
+    "method": "GET",
+    "hostname": "api.rajaongkir.com",
+    "port": null,
+    "path": "/starter/province?id=12",
+    "headers": {
+        "key": "48a348231181e42436d71f8c8efdd9b1"
+    }
+};
+var http = require("https");
+router.get('/get-provinsi', (req, res) => {
+    
+    
+    var options = {
+        "method": "GET",
+        "hostname": "api.rajaongkir.com",
+        "port": null,
+        "path": "/starter/province",
+        "headers": {
+            "key": "48a348231181e42436d71f8c8efdd9b1"
+        }
+    };
+    
+    var reqData = http.request(options, function (result) {
+        var chunks = [];
+    
+        result.on("data", function (chunk) {
+            chunks.push(chunk);
+        });
+    
+        result.on("end", function () {
+            var body = Buffer.concat(chunks);
+            // var buf = JSON.stringify(body)
+            var data = JSON.parse(body.toString())
+            // console.log(data.rajaongkir);
+            
+            res.send(data.rajaongkir)
+        });
+    });
+    
+    reqData.end();
+})
+router.get('/get-city/:provinsi_id', (req, res) => {
+    
+    
+    var options = {
+        "method": "GET",
+        "hostname": "api.rajaongkir.com",
+        "port": null,
+        "path": `/starter/city?province=${req.params.provinsi_id}`,
+        "headers": {
+            "key": "48a348231181e42436d71f8c8efdd9b1"
+        }
+    };
+    
+    var reqData = http.request(options, function (result) {
+        var chunks = [];
+    
+        result.on("data", function (chunk) {
+            chunks.push(chunk);
+        });
+    
+        result.on("end", function () {
+            var body = Buffer.concat(chunks);
+            // var buf = JSON.stringify(body)
+            var data = JSON.parse(body.toString())
+            // console.log(data.rajaongkir);
+            
+            res.send(data.rajaongkir)
+        });
+    });
+    
+    reqData.end();
+})
+
+var qs = require("querystring");
+router.post('/get-cost', (req, res) => {
+    
+    let lengthContent = 50
+    if(req.query.courier === 'tiki') {
+        lengthContent = 51
+    }
+
+    var options = {
+        "method": "POST",
+        "hostname": "api.rajaongkir.com",
+        "port": null,
+        "path": "/starter/cost",
+        "headers": {
+          "key": "48a348231181e42436d71f8c8efdd9b1",
+          "content-type": "application/x-www-form-urlencoded",
+          "Content-Length": lengthContent
+        }
+    };
+      
+    var reqData = http.request(options, function (result) {
+        var chunks = [];
+      
+        result.on("data", function (chunk) {
+            chunks.push(chunk);
+        });
+      
+        result.on("end", function () {
+            if(chunks.length > 0) {
+                var body = Buffer.concat(chunks);
+                // var buf = JSON.stringify(body)
+                var data = JSON.parse(body.toString())
+                // console.log(data.rajaongkir);
+                
+                res.send(data.rajaongkir)
+            } else {
+                res.send('No Available')
+            }
+        });
+
+    });
+
+    // reqData.write(qs.stringify({origin: '501', destination: '114', weight: 1700, courier: 'jne'}));
+    reqData.write(qs.stringify({origin: req.query.origin, destination: req.query.tujuan, weight: req.query.berat, courier: req.query.courier}));
+    reqData.end();
+})
+
+// var options = {
+//     "method": "POST",
+//     "hostname": "api.rajaongkir.com",
+//     "port": null,
+//     "path": "/starter/cost",
+//     "headers": {
+//         "key": "48a348231181e42436d71f8c8efdd9b1",
+//         "content-type": "application/x-www-form-urlencoded",
+//         "Content-Length": 51
+//     }
+// };
+
+// var req = http.request(options, function (res) {
+//     var chunks = [];
+
+//     res.on("data", function (chunk) {
+//         chunks.push(chunk);
+//     });
+
+//     res.on("end", function () {
+//         var body = Buffer.concat(chunks);
+//         console.log(body.toString());
+//     });
+// });
+
+// req.write(qs.stringify({origin: '501', destination: '114', weight: 1700, courier: 'tiki'}));
+// req.end();
+
+router.post('/review', (req, res) => {
+    const sql = `insert into review set ?`
+    const sql2 = 'select * from review where id = ?'
+    conn.query(sql, req.body, (err, result) => {
+        if(err) return res.send(err.message)
+
+        conn.query(sql2, result.insertId, (err, result) => {
+            if(err) return res.send(err.message)
+
+            res.send(result[0])
+        })
+    })
+})
+
+router.get(`/get-review/:id`, (req, res) => {
+    const sql = `select fullname, rating, comment, avatar, create_at from review r join users u on u.id = r.user_id where r.product_id = '${req.params.id}'`
+
+    conn.query(sql, (err, result) => {
+        if(err) return res.send(err.message)
+
+        res.send(result)
+    })
+})
+
+router.get(`/get-popularity`, (req, res) => {
+    const sql = `select p.id, p.name, p.image, p.price, p.brand_id, count(r.id) as 'review' from products p 
+        left join review r on r.product_id = p.id 
+        group by p.id order by count(r.id) desc`
+
+        conn.query(sql, (err, result) => {
+            if(err) return res.send(err.message)
+            res.send(result)
+        })
+})
+
+router.get(`/get-rating`, (req, res) => {
+    const sql = `select p.id, p.name, p.image, p.price, p.brand_id, avg(r.rating) as 'rating' from products p 
+        left join review r on r.product_id = p.id 
+        group by p.id order by avg(r.rating) desc`
+
+        conn.query(sql, (err, result) => {
+            if(err) return res.send(err.message)
+            res.send(result)
+        })
+})
+
+router.get(`/get-newness`, (req, res) => {
+    const sql = `select * from products order by create_at desc`
+
+        conn.query(sql, (err, result) => {
+            if(err) return res.send(err.message)
+            res.send(result)
+        })
+})
+router.get(`/get-pricelow`, (req, res) => {
+    const sql = `select * from products order by price`
+
+        conn.query(sql, (err, result) => {
+            if(err) return res.send(err.message)
+            res.send(result)
+        })
+})
+router.get(`/get-pricehigh`, (req, res) => {
+    const sql = `select * from products order by price desc`
+
+        conn.query(sql, (err, result) => {
+            if(err) return res.send(err.message)
+            res.send(result)
+        })
+})
 
 module.exports = router

@@ -97,7 +97,16 @@ router.delete('/products/:id', (req, res) => {
 
 // get products
 router.get('/productsNew', (req, res) => {
-    const sql = `select * from products order by create_at asc limit 4`
+    const sql = `select * from products order by create_at desc limit 4`
+
+    conn.query(sql, (err, result) => {
+        if(err) return res.send(err)
+
+        res.send(result)
+    })
+})
+router.get('/products-manage', (req, res) => {
+    const sql = `select p.id, name, description, name_category, name_brand, price, stock, image from products p join category c on c.id = p.category_id join brand b on b.id = p.brand_id`
 
     conn.query(sql, (err, result) => {
         if(err) return res.send(err)
@@ -114,7 +123,15 @@ router.get('/products', (req, res) => {
         res.send(result)
     })
 })
+router.get('/products2', (req, res) => {
+    const sql = `select * from products`
 
+    conn.query(sql, (err, result) => {
+        if(err) return res.send(err)
+
+        res.send(result)
+    })
+})
 // get product by id
 router.get('/products/:id', (req, res) => {
     const sql = `select * from products where id = '${req.params.id}'`
@@ -137,6 +154,30 @@ router.get('/get-products/:id', (req, res) => {
 // get product by catogory
 router.get('/products-category/:id', (req, res) => {
     const sql = `select * from products where category_id = '${req.params.id}'`
+
+    conn.query(sql, (err, result) => {
+        if(err) return res.send(err)
+
+        res.send(result)
+    })
+})
+
+router.get('/products-related/:id/:product_id', (req, res) => {
+    // const sql = `select p.id, sum(o.quantity) as 'quantity', p.name, p.image, p.price, p.category_id from order_detail o 
+    //     join products p on p.id = o.product_id where p.category_id = ${req.params.id} 
+    //     group by p.id order by sum(o.quantity) desc limit 4`
+    const sql = `select * from products where category_id = ${req.params.id} and id != ${req.params.product_id} limit 4`
+
+    conn.query(sql, (err, result) => {
+        if(err) return res.send(err)
+
+        res.send(result)
+    })
+})
+router.get('/products-bestseller', (req, res) => {
+    const sql = `select p.id, sum(o.quantity) as 'quantity', p.name, p.image, p.price, p.category_id from order_detail o 
+        join products p on p.id = o.product_id
+        group by p.id order by sum(o.quantity) desc limit 4`
 
     conn.query(sql, (err, result) => {
         if(err) return res.send(err)

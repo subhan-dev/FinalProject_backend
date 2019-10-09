@@ -75,6 +75,15 @@ router.get('/get-carts/:userid', (req, res) => {
         res.send(result)
     })
 })
+router.get('/get-carts-length/:userid', (req, res) => {
+    const sql = `select * from carts where user_id = '${req.params.userid}'`
+
+    conn.query(sql, (err, result) => {
+        if(err) return res.send(err)
+
+        res.send(result)
+    })
+})
 //  get carts for migrate
 router.get('/get-carts-migrate/:userid', (req, res) => {
     const sql = `select * from carts c join products p on p.id = c.product_id join size s on s.id = c.size_id where user_id = '${req.params.userid}'`
